@@ -1,0 +1,3 @@
+# Place config information you want everyone to have here.
+data_url: https://raw.githubusercontent.com/lawrennd/datasets_mirror/main/
+pp_data_url_format: http://prod.publicdata.landregistry.gov.uk.s3-website-eu-west-1.amazonaws.com/pp-{year}.csv

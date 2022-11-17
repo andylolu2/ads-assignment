@@ -1,0 +1,4 @@
+_config.yml
+.vscode
+.python-version
+*.pyc
