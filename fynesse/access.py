@@ -39,8 +39,6 @@ def create_connection(database=None) -> pymysql.Connect:
         port=config["db_port"],
         local_infile=1,
         db=database,
-        read_timeout=60,
-        write_timeout=60,
     )
 
 
