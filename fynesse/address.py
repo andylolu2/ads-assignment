@@ -1,3 +1,4 @@
+import warnings
 from datetime import datetime, timedelta
 from typing import Dict, Optional
 
@@ -121,7 +122,6 @@ def full_set(
     pp_gdf = to_flat_crs(pp_gdf)
     pp_gdf.geometry = pp_gdf.geometry.buffer(buffer_size)
     pp_gdf = to_geographic_crs(pp_gdf)
-    pp_gdf["pp_geo"] = pp_gdf.geometry
 
     geometry = gpd.points_from_xy(x=[longitude], y=[latitude])
     data = {
@@ -143,17 +143,18 @@ def full_set(
     osm_gdf = to_flat_crs(osm_gdf)
     osm_gdf["osm_geo_area"] = osm_gdf.geometry.area
     osm_gdf = to_geographic_crs(osm_gdf)
+    osm_gdf = osm_gdf.reset_index(drop=True)
 
     print("Performing spatial join...")
     gdf_train = spatial_join(
         pp_gdf_train, osm_gdf, how="left", lsuffix="pp", rsuffix="osm"
-    )
+    ).drop(columns="index_osm")
     gdf_test = spatial_join(
         pp_gdf_test, osm_gdf, how="left", lsuffix="pp", rsuffix="osm"
-    )
+    ).drop(columns="index_osm")
     gdf_pred = spatial_join(
         pp_gdf_pred, osm_gdf, how="left", lsuffix="pp", rsuffix="osm"
-    )
+    ).drop(columns="index_osm")
     return gdf_train, gdf_test, gdf_pred
 
 
@@ -224,10 +225,12 @@ def predict_price(
         latitude, longitude, date, property_type, t_days, bbox_length, buffer_size
     )
 
+    train_size = len(train_x)
+    if train_size < 100:
+        warnings.warn(f"")
+
     model = sm.GLM(train_y, train_x, family=sm.families.Poisson())
     results = model.fit()
 
-    train_y_pred = results.get_prediction(train_x).summary_frame(alpha=0.05)
+    train_y_pred = results.get_prediction(train_x)
     test_y_pred = results.get_prediction(test_x).summary_frame(alpha=0.05)
-
-    pass
