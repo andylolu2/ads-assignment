@@ -39,6 +39,7 @@ REQUIRED = [
     "pygeos",
     "statsmodels",
     "seaborn",
+    "osmnx",
 ]
 
 # What packages are optional?
