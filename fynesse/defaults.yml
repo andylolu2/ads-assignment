@@ -2,3 +2,15 @@
 data_url: https://raw.githubusercontent.com/lawrennd/datasets_mirror/main/
 pp_data_url_format: http://prod.publicdata.landregistry.gov.uk.s3-website-eu-west-1.amazonaws.com/pp-{year}.csv
 pp_data_part_url_format: http://prod.publicdata.landregistry.gov.uk.s3-website-eu-west-1.amazonaws.com/pp-{year}-part{part}.csv
+
+osm_tags:
+  building: True
+  residential: True
+  shop: True
+  natural: True
+  amenity: True
+  leisure: True
+
+sample_coords:
+  christs: [52.2062, 0.1225]
+  hammersmith: [51.4912, -0.2237]

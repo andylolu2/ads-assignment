@@ -1,19 +1,14 @@
 from pathlib import Path
 from typing import Union
 
+import osmnx
 import pandas as pd
 import pymysql
 import pymysql.cursors
 import requests
 
 from .config import *
-
-"""These are the types of import we might expect in this file
-import httplib2
-import oauth2
-import tables
-import mongodb
-import sqlite"""
+from .utils import BBox, set_areas
 
 # This file accesses the data
 
@@ -43,6 +38,7 @@ def create_connection(database=None) -> pymysql.Connect:
 
 
 def download(url: str, local: Union[str, Path], skip_if_exists=True):
+    """Downloads a file from a url to a local path"""
     path = Path(local)
     if path.exists() and skip_if_exists:
         return path
@@ -54,24 +50,31 @@ def download(url: str, local: Union[str, Path], skip_if_exists=True):
     return path
 
 
-def upload(file_path: Path, *, table: str, database):
+def upload(file_path: Path, *, table: str, database, delimiter=""):
+    """Uploads a local file to a given table in database"""
     with create_connection(database) as conn:
         with conn.cursor() as cursor:
             cursor.execute(
-                f"""
-                    LOAD DATA LOCAL INFILE '{str(file_path)}' INTO TABLE `{table}`
-                    FIELDS TERMINATED BY ',' ENCLOSED BY '"'
+                """
+                    LOAD DATA LOCAL INFILE %(file_path)s INTO TABLE %(table)s
+                    FIELDS TERMINATED BY ',' ENCLOSED BY %(delimiter)s
                     LINES STARTING BY '' TERMINATED BY '\n'
-            """
+                """,
+                {
+                    "file_path": str(file_path),
+                    "table": table,
+                    "delimiter": delimiter,
+                },
             )
         conn.commit()
     print(f"Uploaded data {file_path}")
 
 
-def sql_read(sql: str, database=None):
+def sql_read(sql: str, database=None, **kwargs):
+    """Performs a sql query and return the results as a pandas DataFrame"""
     with create_connection(database) as conn:
         with conn.cursor() as cursor:
-            cursor.execute(sql)
+            cursor.execute(sql, kwargs)
             columns = [col[0] for col in cursor.description]
             rows = cursor.fetchall()
 
@@ -80,12 +83,14 @@ def sql_read(sql: str, database=None):
 
 
 def reset(table: str, database=None):
+    """Clears a given table"""
     with create_connection(database) as conn:
         with conn.cursor() as cursor:
-            cursor.execute(f"TRUNCATE TABLE `{table}`")
+            cursor.execute(f"TRUNCATE TABLE %s", (table,))
         conn.commit()
 
 
-def data():
-    """Read the data from the web or local file, returning structured format such as a data frame"""
-    raise NotImplementedError
+def osm_pois(bbox: BBox):
+    """Access the OpenStreetMap API and download relevant point of interests"""
+    gdf = osmnx.geometries_from_bbox(*bbox, tags=config["osm_tags"])
+    return set_areas(gdf)
