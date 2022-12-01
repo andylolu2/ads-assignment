@@ -4,3 +4,4 @@ _config.yml
 *.pyc
 cache
 data
+*_full.ipynb
