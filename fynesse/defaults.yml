@@ -14,3 +14,17 @@ osm_tags:
 sample_coords:
   christs: [52.2062, 0.1225]
   hammersmith: [51.4912, -0.2237]
+
+osm_features:
+  building: "categorical"
+  amenity: "categorical"
+  capacity: "number"
+  building:levels: "number"
+  shop: "categorical"
+  natural: "categorical"
+  osm_geo_area: "number"
+
+pp_features:
+  price: "number"
+  date_of_transfer: "date"
+  property_type: "categorical"

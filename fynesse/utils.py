@@ -2,6 +2,8 @@ import math
 from typing import Tuple
 
 import geopandas as gpd
+import numpy as np
+import pandas as pd
 
 BBox = Tuple[float, float, float, float]
 
@@ -43,6 +45,29 @@ def spatial_join(
 ) -> gpd.GeoDataFrame:
     gdf1 = to_flat_crs(gdf1)
     gdf2 = to_flat_crs(gdf2)
+    gdf2["saved_geometry"] = gdf2.geometry
     res = gdf1.sjoin(gdf2, *args, **kwargs)
+    res["distance"] = res.centroid.distance(res["saved_geometry"].centroid)
     res = to_geographic_crs(res)
     return res
+
+
+def split_df(df: pd.DataFrame, prop: float):
+    mask = np.random.rand(len(df)) < prop
+    df1 = df.iloc[mask]
+    df2 = df.iloc[~mask]
+    return df1, df2
+
+
+def get_type(value):
+    if isinstance(value, str):
+        if value.isdigit():
+            return int
+        elif value.replace(".", "").isdigit():
+            return float
+    return type(value)
+
+
+def predict(results, x):
+    pred = results.get_prediction(x.to_numpy(np.float32)).summary_frame(0.95)
+    return pred["mean"], pred["obs_ci_lower"], pred["obs_ci_upper"]

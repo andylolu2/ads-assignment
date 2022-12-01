@@ -10,8 +10,6 @@ from . import access
 from .config import *
 from .utils import BBox, set_areas
 
-"""Place commands in this file to assess the data you have downloaded. How are missing values encoded,  how are outliers encoded? What do columns represent,makes rure they are correctly labeled. How is the data indexed. Crete visualisation routines to assess the data (e.g. in bokeh). Ensure that date formats are correct and correctly timezoned."""
-
 
 def clean_pp_data(sql: str, database=None, **kwargs):
     df = access.sql_read(sql, database, **kwargs)
@@ -28,10 +26,6 @@ def query_price(
     date_min: Optional[Union[datetime, str]] = None,
     date_max: Optional[Union[datetime, str]] = None,
     bbox: Optional[BBox] = None,
-    town_city: Optional[str] = None,
-    district: Optional[str] = None,
-    county: Optional[str] = None,
-    country: Optional[str] = None,
     limit: Optional[int] = None,
 ):
     """
@@ -57,10 +51,6 @@ def query_price(
         ("pc.latitude", latitude_max, "<="),
         ("pc.longitude", longitude_min, ">="),
         ("pc.longitude", longitude_max, "<="),
-        ("pp.town_city", town_city, "="),
-        ("pp.district", district, "="),
-        ("county", county, "="),
-        ("country", country, "="),
     ]
 
     for i, (field, value, comparator) in enumerate(all_args):
@@ -145,21 +135,6 @@ def visualise_osm(bbox: BBox, feature: str, legend: bool, ax: plt.Axes):
     ax.set_xlabel("Longitude")
     ax.set_ylabel("Latitude")
     ax.set_title(feature)
-
-
-def query(data):
-    """Request user input for some aspect of the data."""
-    raise NotImplementedError
-
-
-def view(data):
-    """Provide a view of the data that allows the user to verify some aspect of its quality."""
-    raise NotImplementedError
-
-
-def labelled(data):
-    """Provide a labelled set of data ready for supervised learning."""
-    raise NotImplementedError
 
 
 def verify_pp_data():
